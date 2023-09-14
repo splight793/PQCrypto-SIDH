@@ -1,3 +1,8 @@
+This is a fork of Microsoft's [PQCrypto-SIDH](https://github.com/microsoft/PQCrypto-SIDH).
+The Montgomery Reduction of SIKEp503 has been adapted to use Karatsuba Multiplication.
+More infomation could be found at [here](https://arxiv.org/abs/2308.16432).
+
+
 # Warning
 
 The SIDH and SIKE protocols were proven insecure after a series of attacks starting with [14]. 

@@ -8,6 +8,8 @@
 // Abstract: field arithmetic in 64-bit ARMv8 assembly for P503 on Linux
 //*******************************************************************************************
 
+//Modified by PENGCHANG REN
+
 // Format function and variable names for Mac OS X
 #if defined(__APPLE__)
     #define fmt(f)    _##f
@@ -522,162 +524,234 @@ fmt(mul503_asm):
 //************************************************************************************** 
 .global fmt(rdc503_asm)
 fmt(rdc503_asm):
-    sub     sp, sp, #96
-    stp     x23, x24, [sp, #32]
-    stp     x25, x26, [sp, #48]
-    ldp     x2, x3, [x0,#0]       // a[0-1]
-
+    sub     sp,     sp,     #128
+    stp     x23,    x24,    [sp, #32]
+    stp     x25,    x26,    [sp, #48]
+    //a[0-2]->x2-x4
+    ldp     x2,     x3,     [x0, #0]
+    ldp     x4,     x5,     [x0, #16]
     // Load the prime constant
-    ldr     x24, p503p1_nz_s8 + 0
-    ldr     x25, p503p1_nz_s8 + 8 
-    stp     x19, x20, [sp]
-    stp     x21, x22, [sp, #16] 
-
-    // a[0-1] x p503p1_nz_s8 --> result: x4:x9
-    mul     x4, x2, x24           // a[0] x p503p1_nz_s8[0]
-    umulh   x7, x2, x24 
-    stp     x27, x28, [sp, #64]
-    stp     x29, x30, [sp, #80] 
-    ldr     x26, p503p1_nz_s8 + 16
-    ldr     x27, p503p1_nz_s8 + 24       
-    mul     x5, x2, x25           // a[0] x p503p1_nz_s8[1]
-    umulh   x6, x2, x25
-    MUL128x256_COMBA_CUT x2, x3, x24, x25, x26, x27, x4, x5, x6, x7, x8, x9, x28, x29, x30, x10    
-
-    orr     x10, xzr, x9, lsr #8
-    lsl     x9, x9, #56
-    orr     x9, x9, x8, lsr #8
-    lsl     x8, x8, #56  
-    orr     x8, x8, x7, lsr #8
-    lsl     x7, x7, #56
-    orr     x7, x7, x6, lsr #8
-    lsl     x6, x6, #56  
-    ldp     x3, x11, [x0,#16]     // a[2]
-    orr     x6, x6, x5, lsr #8
-    lsl     x5, x5, #56   
-    ldp     x12, x13, [x0,#32]
-    orr     x5, x5, x4, lsr #8
-    lsl     x4, x4, #56
-    ldp     x14, x15, [x0,#48] 
-    
-    adds    x11, x4, x11          // a[3]
-    adcs    x12, x5, x12          // a[4]
-    ldp     x16, x17, [x0,#64]  
-    adcs    x13, x6, x13
-    adcs    x14, x7, x14  
-    ldp     x18, x19, [x0,#80]  
-    adcs    x15, x8, x15  
-    mul     x4, x3, x24           // a[2] x p503p1_nz_s8[0]
-    umulh   x7, x3, x24
-    adcs    x16, x9, x16
-    adcs    x17, x10, x17
-    ldp     x20, x21, [x0,#96]  
-    adcs    x18, xzr, x18 
-    adcs    x19, xzr, x19        
-    ldp     x22, x23, [x0,#112] 
-    mul     x5, x3, x25           // a[2] x p503p1_nz_s8[1] 
-    umulh   x6, x3, x25
-    adcs    x20, xzr, x20
-    adcs    x21, xzr, x21
-    adcs    x22, xzr, x22
-    adc     x23, xzr, x23
-
-    // a[2-3] x p503p1_nz_s8 --> result: x4:x9
-    MUL128x256_COMBA_CUT x3, x11, x24, x25, x26, x27, x4, x5, x6, x7, x8, x9, x28, x29, x30, x10
-
-    orr     x10, xzr, x9, lsr #8
-    lsl     x9, x9, #56
-    orr     x9, x9, x8, lsr #8
-    lsl     x8, x8, #56
-    orr     x8, x8, x7, lsr #8
-    lsl     x7, x7, #56
-    orr     x7, x7, x6, lsr #8
-    lsl     x6, x6, #56
-    orr     x6, x6, x5, lsr #8
-    lsl     x5, x5, #56
-    orr     x5, x5, x4, lsr #8
-    lsl     x4, x4, #56
-    
-    adds    x13, x4, x13          // a[5]
-    adcs    x14, x5, x14          // a[6]
-    adcs    x15, x6, x15
-    adcs    x16, x7, x16
-    mul     x4, x12, x24          // a[4] x p503p1_nz_s8[0]
-    umulh   x7, x12, x24
-    adcs    x17, x8, x17
-    adcs    x18, x9, x18
-    adcs    x19, x10, x19
-    adcs    x20, xzr, x20
-    mul     x5, x12, x25          // a[4] x p503p1_nz_s8[1]
-    umulh   x6, x12, x25
-    adcs    x21, xzr, x21
-    adcs    x22, xzr, x22
-    adc     x23, xzr, x23
-
-    // a[4-5] x p503p1_nz_s8 --> result: x4:x9
-    MUL128x256_COMBA_CUT x12, x13, x24, x25, x26, x27, x4, x5, x6, x7, x8, x9, x28, x29, x30, x10    
-
-    orr     x10, xzr, x9, lsr #8
-    lsl     x9, x9, #56
-    orr     x9, x9, x8, lsr #8
-    lsl     x8, x8, #56
-    orr     x8, x8, x7, lsr #8
-    lsl     x7, x7, #56
-    orr     x7, x7, x6, lsr #8
-    lsl     x6, x6, #56
-    orr     x6, x6, x5, lsr #8
-    lsl     x5, x5, #56
-    orr     x5, x5, x4, lsr #8
-    lsl     x4, x4, #56
-    
-    adds    x15, x4, x15          // a[7]
-    adcs    x16, x5, x16          // a[8]
-    adcs    x17, x6, x17
-    adcs    x18, x7, x18
-    mul     x4, x14, x24          // a[6] x p503p1_nz_s8[0]
-    umulh   x7, x14, x24
-    adcs    x19, x8, x19
-    adcs    x20, x9, x20
-    adcs    x21, x10, x21
-    mul     x5, x14, x25          // a[6] x p503p1_nz_s8[1]
-    umulh   x6, x14, x25
-    adcs    x22, xzr, x22
-    adc     x23, xzr, x23
-
-    // a[6-7] x p503p1_nz_s8 --> result: x4:x9
-    MUL128x256_COMBA_CUT x14, x15, x24, x25, x26, x27, x4, x5, x6, x7, x8, x9, x28, x29, x30, x10
-
-    orr     x10, xzr, x9, lsr #8
-    lsl     x9, x9, #56
-    orr     x9, x9, x8, lsr #8
-    lsl     x8, x8, #56
-    orr     x8, x8, x7, lsr #8
-    lsl     x7, x7, #56
-    orr     x7, x7, x6, lsr #8
-    lsl     x6, x6, #56
-    ldp     x25, x26, [sp, #48]
-    orr     x6, x6, x5, lsr #8
-    lsl     x5, x5, #56
-    ldp     x27, x28, [sp, #64]
-    orr     x5, x5, x4, lsr #8
-    lsl     x4, x4, #56
-    ldp     x29, x30, [sp, #80]
-    
-    adds    x17, x4, x17
-    stp     x16, x17, [x1,#0]     // Final result
-    adcs    x18, x5, x18
-    adcs    x19, x6, x19
-    stp     x18, x19, [x1,#16]   
-    adcs    x20, x7, x20 
-    adcs    x21, x8, x21
-    stp     x20, x21, [x1,#32]
-    ldp     x19, x20, [sp]
-    adcs    x22, x9, x22
-    adc     x23, x10, x23
-    stp     x22, x23, [x1,#48]    
-    ldp     x21, x22, [sp, #16]
-    ldp     x23, x24, [sp, #32]
-    add     sp, sp, #96
+    ldr     x24,    p503p1_nz_s8 + 0
+    ldr     x25,    p503p1_nz_s8 + 8
+    stp     x19,    x20,    [sp]
+    stp     x21,    x22,    [sp, #16]
+    // multiply to get a[3]
+    mul     x6,     x2,     x24
+    umulh   x7,     x2,     x24 
+    stp     x27,    x28,    [sp, #64]
+    stp     x29,    x30,    [sp, #80] 
+    ldr     x26,    p503p1_nz_s8 + 16
+    ldr     x27,    p503p1_nz_s8 + 24
+    // (a[3], carry)->x5, x23
+    adds    x5,     x5,     x6,     lsl #56
+    adc     x23,    xzr,    xzr
+    //(AH+AL),(BH+BL) with mask
+    adds    x14,    x2,     x4
+    adcs    x15,    x3,     x5
+    adc     x16,    xzr,    xzr
+    neg     x16,    x16
+    str     x0,     [sp, #96]
+    add     x28,    x24,    x26
+    and     x10,    x28,    x16
+    add     x29,    x25,    x27
+    and     x11,    x29,    x16
+    //(AH+AL)*(BH+BL) with Comba
+    mul     x16,    x14,    x28
+    umulh   x17,    x14,    x28
+    mul     x18,    x14,    x29
+    umulh   x19,    x14,    x29
+    mul     x20,    x15,    x28
+    umulh   x21,    x15,    x28
+    mul     x22,    x15,    x29
+    umulh   x30,    x15,    x29
+    adds    x17,    x17,    x18
+    adcs    x18,    x22,    x19
+    adc     x19,    x30,    xzr
+    adds    x17,    x17,    x20
+    adcs    x18,    x18,    x21
+    adc     x19,    x19,    xzr
+    adds    x18,    x18,    x10
+    adcs    x19,    x19,    x11
+    adc     x20,    xzr,    xzr
+    //AL*BL with Comba
+    mul     x8,     x3,     x25
+    umulh   x9,     x3,     x25
+    mul     x14,    x2,     x25
+    adds    x7,     x7,     x14
+    umulh   x15,    x2,     x25
+    adcs    x8,     x8,     x15
+    adc     x9,     x9,     xzr
+    mul     x2,     x3,     x24
+    adds    x7,     x7,     x2
+    umulh   x3,     x3,     x24
+    adcs    x8,     x8,     x3
+    adc     x9,     x9,     xzr
+    //(AH+AL)*(BH+BL)-AL*BL
+    subs    x16,    x16,    x6
+    sbcs    x17,    x17,    x7
+    sbcs    x18,    x18,    x8
+    sbcs    x19,    x19,    x9
+    sbc     x20,    x20,    xzr
+    //AH*BH with Comba
+    mul     x10,    x4,     x26
+    umulh   x11,    x4,     x26
+    mul     x12,    x5,     x27
+    umulh   x13,    x5,     x27
+    mul     x14,    x4,     x27
+    adds    x11,    x11,    x14
+    umulh   x15,    x4,     x27
+    adcs    x12,    x12,    x15
+    adc     x13,    x13,    xzr
+    mul     x4,     x5,     x26
+    adds    x11,    x11,    x4
+    umulh   x5,     x5,     x26
+    adcs    x12,    x12,    x5
+    adc     x13,    x13,    xzr
+    ldp     x2,     x3,     [x0, #32]
+    ldp     x4,     x5,     [x0, #48]
+    //(AH+AL)*(BH+BL)-AL*BL-AH*BH
+    subs    x16,    x16,    x10
+    sbcs    x17,    x17,    x11
+    sbcs    x18,    x18,    x12
+    sbcs    x19,    x19,    x13
+    sbc     x20,    x20,    xzr
+    //final product
+    adds    x8,     x8,     x16
+    adcs    x9,     x9,     x17
+    adcs    x10,    x10,    x18
+    adcs    x11,    x11,    x19
+    adcs    x12,    x12,    x20
+    adc     x13,    x13,    xzr
+    //Recovering carry from a[3]
+    neg     x23,    x23
+    ldp     x14,    x15,    [x0, #64]
+    ldp     x16,    x17,    [x0, #80]
+    adds    xzr,    x23,    #1
+    //shift to correct position and add
+    extr    x6,     x7,     x6,     #8
+    adcs    x2,     x2,     x6
+    extr    x7,     x8,     x7,     #8
+    adcs    x3,     x3,     x7
+    extr    x8,     x9,     x8,     #8
+    adcs    x4,     x4,     x8
+    extr    x9,     x10,    x9,     #8
+    adcs    x5,     x5,     x9
+    extr    x10,    x11,    x10,    #8
+    adcs    x6,     x14,    x10
+    extr    x11,    x12,    x11,    #8
+    adcs    x7,     x15,    x11
+    extr    x12,    x13,    x12,    #8
+    adcs    x8,     x16,    x12
+    lsr     x13,    x13,    #8
+    adcs    x9,     x17,    x13
+    //repeate above
+    adc     x30,    xzr,    xzr
+    mul     x22,    x2,     x24
+    adds    x5,     x5,     x22,    lsl 56
+    adc     x23,    xzr,    xzr
+    neg     x23,    x23
+    adds    x0,     x2,     x4
+    adcs    x14,    x3,     x5
+    adcs    x15,    xzr,    xzr
+    neg     x15,    x15
+    and     x18,    x28,    x15
+    and     x20,    x29,    x15
+    mul     x16,    x0,     x28
+    umulh   x17,    x0,     x28
+    mul     x15,    x0,     x29
+    adds    x17,    x17,    x15
+    umulh   x0,     x0,     x29
+    adcs    x18,    x18,    x0
+    umulh   x19,    x14,    x29
+    adc     x19,    x19,    xzr
+    mul     x13,    x14,    x28
+    adds    x17,    x17,    x13
+    umulh   x28,    x14,    x28
+    adcs    x18,    x18,    x28
+    adc     x19,    x19,    xzr
+    mul     x14,    x14,    x29
+    adds    x18,    x18,    x14
+    adcs    x19,    x19,    x20
+    adc     x20,    xzr,    xzr
+    umulh   x11,    x2,     x24
+    mul     x12,    x3,     x25
+    umulh   x13,    x3,     x25
+    mul     x0,     x2,     x25
+    adds    x11,    x11,    x0
+    ldr     x0,     [sp, #96]
+    umulh   x2,     x2,     x25
+    adcs    x12,    x12,    x2
+    adc     x13,    x13,    xzr
+    mul     x14,    x3,     x24
+    adds    x11,    x11,    x14
+    umulh   x15,    x3,     x24
+    adcs    x12,    x12,    x15
+    adc     x13,    x13,    xzr
+    subs    x16,    x16,    x22
+    sbcs    x17,    x17,    x11
+    sbcs    x18,    x18,    x12
+    sbcs    x19,    x19,    x13
+    sbc     x20,    x20,    xzr
+    neg     x30,    x30
+    adds    xzr,    x30,    #1
+    adcs    x18,    x18,    xzr
+    adcs    x19,    x19,    xzr
+    adc     x20,    x20,    xzr
+    ldp     x2,     x3,     [x0, #96]
+    ldp     x29,    x30,    [x0, #112]
+    mul     x0,     x4,     x26
+    umulh   x10,    x4,     x26
+    mul     x14,    x5,     x27
+    umulh   x15,    x5,     x27
+    mul     x21,    x4,     x27
+    adds    x10,    x10,    x21
+    umulh   x4,     x4,     x27
+    adcs    x14,    x14,    x4
+    adc     x15,    x15,    xzr
+    mul     x24,    x5,     x26
+    adds    x10,    x10,    x24 
+    umulh   x25,    x5,     x26
+    adcs    x14,    x14,    x25
+    adc     x15,    x15,    xzr
+    subs    x16,    x16,    x0
+    sbcs    x17,    x17,    x10
+    sbcs    x18,    x18,    x14
+    sbcs    x19,    x19,    x15
+    sbc     x20,    x20,    xzr
+    adds    x12,    x12,    x16
+    adcs    x13,    x13,    x17
+    adcs    x0,     x0,     x18
+    adcs    x10,    x10,    x19
+    adcs    x14,    x14,    x20
+    ldp     x27,    x28,    [sp, #64]
+    ldp     x25,    x26,    [sp, #48]
+    ldp     x19,    x20,    [sp]
+    adc     x15,    x15,    xzr
+    adds    xzr,    x23,    #1
+    ldp     x23,    x24,    [sp, #32]
+    extr    x22,    x11,    x22,    #8
+    adcs    x6,     x6,     x22
+    ldp     x21,    x22,    [sp, #16]
+    extr    x11,    x12,    x11,    #8
+    adcs    x7,     x7,     x11
+    extr    x12,    x13,    x12,    #8
+    adcs    x8,     x8,     x12
+    extr    x13,    x0,     x13,    #8
+    adcs    x9,     x9,     x13
+    extr    x0,     x10,    x0,     #8
+    adcs    x0,     x0,     x2
+    extr    x10,    x14,    x10,    #8
+    adcs    x10,    x10,    x3
+    extr    x14,    x15,    x14,    #8
+    adcs    x14,    x14,    x29
+    lsr     x15,    x15,    #8
+    adc     x15,    x15,    x30
+    ldp     x29,    x30,    [sp, #80]
+    stp     x6,     x7,     [x1]
+    stp     x8,     x9,     [x1, #16]
+    stp     x0,     x10,    [x1, #32]
+    stp     x14,    x15,    [x1, #48]
+    add     sp,     sp,     #128
     ret
 
 
@@ -915,3 +989,4 @@ fmt(mp_dblsub503x2_asm):
     ldp     x29, x30, [sp, #16]
     add     sp, sp, #32
     ret
+

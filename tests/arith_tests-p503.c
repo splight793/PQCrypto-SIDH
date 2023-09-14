@@ -8,23 +8,21 @@
 * Abstract: testing code for field arithmetic, elliptic curve and isogeny functions
 *********************************************************************************************/
 
+//Modified by PENGCHANG REN
+
 #include "../src/config.h"
 #include "../src/P503/P503_internal.h"
 #include "../src/internal.h"
 #include "test_extras.h"
 #include <stdio.h>
-
+#define _unroll(a) a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a
 
 // Benchmark and test parameters  
-#if defined(GENERIC_IMPLEMENTATION) || (OS_TARGET == OS_WIN) || (TARGET == TARGET_ARM) 
-    #define BENCH_LOOPS           100       // Number of iterations per bench
-    #define SMALL_BENCH_LOOPS     100       // Number of iterations per bench
-    #define TEST_LOOPS             10       // Number of iterations per test
-#else
-    #define BENCH_LOOPS       1000000 
-    #define SMALL_BENCH_LOOPS   10000       
+
+    #define BENCH_LOOPS       10000 
+    #define SMALL_BENCH_LOOPS   1000       
     #define TEST_LOOPS            100   
-#endif
+
 
 
 bool fp_test()
@@ -365,11 +363,11 @@ bool fp_run()
     for (n=0; n<BENCH_LOOPS; n++)
     {
         cycles1 = cpucycles(); 
-        fpadd503(a, b, c);
+        _unroll(fpadd503(a, b, c));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  GF(p) addition runs in .......................................... %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  GF(p) addition runs in .......................................... %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // GF(p) subtraction using p503
@@ -377,11 +375,11 @@ bool fp_run()
     for (n=0; n<BENCH_LOOPS; n++)
     {
         cycles1 = cpucycles(); 
-        fpsub503(a, b, c);
+        _unroll(fpsub503(a, b, c));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  GF(p) subtraction runs in ....................................... %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  GF(p) subtraction runs in ....................................... %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // GF(p) multiplication using p503
@@ -389,11 +387,11 @@ bool fp_run()
     for (n=0; n<BENCH_LOOPS; n++)
     {
         cycles1 = cpucycles(); 
-        fpmul503_mont(a, b, c);
+        _unroll(fpmul503_mont(a, b, c));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  GF(p) multiplication runs in .................................... %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  GF(p) multiplication runs in .................................... %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // GF(p) inversion
@@ -401,11 +399,11 @@ bool fp_run()
     for (n=0; n<SMALL_BENCH_LOOPS; n++)
     {
         cycles1 = cpucycles(); 
-        fpinv503_mont(a);
+        _unroll(fpinv503_mont(a));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  GF(p) inversion (exponentiation) runs in ........................ %7lld ", cycles/SMALL_BENCH_LOOPS); print_unit;
+    printf("  GF(p) inversion (exponentiation) runs in ........................ %7lld ", cycles/50/SMALL_BENCH_LOOPS); print_unit;
     printf("\n"); 
     
     return OK;
@@ -429,11 +427,11 @@ bool fp2_run()
     for (n=0; n<BENCH_LOOPS; n++)
     {
         cycles1 = cpucycles(); 
-        fp2add503(a, b, c);
+        _unroll(fp2add503(a, b, c));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  GF(p^2) addition runs in ........................................ %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  GF(p^2) addition runs in ........................................ %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // GF(p^2) subtraction
@@ -441,11 +439,11 @@ bool fp2_run()
     for (n=0; n<BENCH_LOOPS; n++)
     {
         cycles1 = cpucycles(); 
-        fp2sub503(a, b, c);
+        _unroll(fp2sub503(a, b, c));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  GF(p^2) subtraction runs in ..................................... %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  GF(p^2) subtraction runs in ..................................... %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // GF(p^2) multiplication
@@ -453,11 +451,11 @@ bool fp2_run()
     for (n=0; n<BENCH_LOOPS; n++)
     {
         cycles1 = cpucycles(); 
-        fp2mul503_mont(a, b, c);
+        _unroll(fp2mul503_mont(a, b, c));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  GF(p^2) multiplication runs in .................................. %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  GF(p^2) multiplication runs in .................................. %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // GF(p^2) squaring
@@ -465,11 +463,11 @@ bool fp2_run()
     for (n=0; n<BENCH_LOOPS; n++)
     {
         cycles1 = cpucycles(); 
-        fp2sqr503_mont(a, b);
+        _unroll(fp2sqr503_mont(a, b));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  GF(p^2) squaring runs in ........................................ %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  GF(p^2) squaring runs in ........................................ %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // GF(p^2) inversion
@@ -477,11 +475,11 @@ bool fp2_run()
     for (n=0; n<SMALL_BENCH_LOOPS; n++)
     {
         cycles1 = cpucycles(); 
-        fp2inv503_mont(a);
+        _unroll(fp2inv503_mont(a));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  GF(p^2) inversion (exponentiation) runs in ...................... %7lld ", cycles/SMALL_BENCH_LOOPS); print_unit;
+    printf("  GF(p^2) inversion (exponentiation) runs in ...................... %7lld ", cycles/50/SMALL_BENCH_LOOPS); print_unit;
     printf("\n");
     
     return OK;
@@ -506,11 +504,11 @@ bool ecisog_run()
         fp2random503_test((digit_t*)A24); fp2random503_test((digit_t*)C24);
 
         cycles1 = cpucycles(); 
-        xDBL(P, Q, A24, C24);
+        _unroll(xDBL(P, Q, A24, C24));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  Point doubling runs in .......................................... %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  Point doubling runs in .......................................... %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // 4-isogeny of a projective point
@@ -520,11 +518,11 @@ bool ecisog_run()
         fp2random503_test((digit_t*)A); fp2random503_test((digit_t*)coeff[0]); fp2random503_test((digit_t*)coeff[1]); fp2random503_test((digit_t*)coeff[2]);
 
         cycles1 = cpucycles(); 
-        get_4_isog(P, A, C, coeff);
+        _unroll(get_4_isog(P, A, C, coeff));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  4-isogeny of projective point runs in ........................... %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  4-isogeny of projective point runs in ........................... %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // 4-isogeny evaluation at projective point
@@ -534,11 +532,11 @@ bool ecisog_run()
         fp2random503_test((digit_t*)A); fp2random503_test((digit_t*)coeff[0]); fp2random503_test((digit_t*)coeff[1]); fp2random503_test((digit_t*)coeff[2]);
 
         cycles1 = cpucycles(); 
-        eval_4_isog(P, coeff);
+        _unroll(eval_4_isog(P, coeff));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  4-isogeny evaluation at projective point runs in ................ %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  4-isogeny evaluation at projective point runs in ................ %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // Point tripling
@@ -548,11 +546,11 @@ bool ecisog_run()
         fp2random503_test((digit_t*)A4); fp2random503_test((digit_t*)C);
 
         cycles1 = cpucycles(); 
-        xTPL(P, Q, A4, C);
+        _unroll(xTPL(P, Q, A4, C));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  Point tripling runs in .......................................... %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  Point tripling runs in .......................................... %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // 3-isogeny of a projective point
@@ -562,11 +560,11 @@ bool ecisog_run()
         fp2random503_test((digit_t*)A); fp2random503_test((digit_t*)C);
 
         cycles1 = cpucycles(); 
-        get_3_isog(P, A, C, coeff);
+        _unroll(get_3_isog(P, A, C, coeff));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  3-isogeny of projective point runs in ........................... %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  3-isogeny of projective point runs in ........................... %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
 
     // 3-isogeny evaluation at projective point
@@ -574,11 +572,11 @@ bool ecisog_run()
     for (n=0; n<BENCH_LOOPS; n++)
     {
         cycles1 = cpucycles(); 
-        eval_3_isog(Q, coeff);
+        _unroll(eval_3_isog(Q, coeff));
         cycles2 = cpucycles();
         cycles = cycles+(cycles2-cycles1);
     }
-    printf("  3-isogeny evaluation at projective point runs in ................ %7lld ", cycles/BENCH_LOOPS); print_unit;
+    printf("  3-isogeny evaluation at projective point runs in ................ %7lld ", cycles/50/BENCH_LOOPS); print_unit;
     printf("\n");
     
     return OK;
